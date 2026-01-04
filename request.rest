@@ -5,17 +5,41 @@ GET http://localhost:4000/post
 POST http://localhost:4000/post
 Content-Type: application/json
 
-{ "title": "first post", "sender": "chang", "content": "my life is a lie" }
+{ "title": "first post", "sender": "shai", "content": "my life is a lie" }
+###
+# Get Post by ID
+GET http://localhost:4000/post/695a9c6ef52498fa30454939
+###
+# Update Post
+PUT http://localhost:4000/post/695a9c6ef52498fa30454937
+Content-Type: application/json 
+
+{ "title": "first post2", "sender": "chang", "content": "my life is a lie 2" }
+###
+# Get Posts by Sender
+GET http://localhost:4000/post?sender=chang
 ###
 # Get Comments
 GET http://localhost:4000/comment
 ###
-# Get Comments
-GET http://localhost:4000/comment/695579965c2cd7f5d0d3a9af
+# Get Comment
+GET http://localhost:4000/comment/695a9e98c7b19ffc8e6d78ae
 ###
-# Create Post
+# Create Comment
 POST http://localhost:4000/comment
 Content-Type: application/json
 
-{ "postId": "695696c58e15f542f41a8f4f", "sender": "chang", "content": "your life is a lie" }
+{ "postId": "695a9c6ef52498fa30454937", "sender": "shai", "content": "testing" }
+###
+# Update Comment
+PATCH http://localhost:4000/comment/695a9e98c7b19ffc8e6d78ae
+Content-Type: application/json
+
+{"content": "your life is a lie 3" }
+###
+# Delete Comment
+DELETE http://localhost:4000/comment/695a9e98c7b19ffc8e6d78ae
+###
+# Get Comments by Post ID
+GET http://localhost:4000/comment?postId=695a9c6ef52498fa30454937
 ###

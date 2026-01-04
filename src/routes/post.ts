@@ -1,5 +1,6 @@
 import express from "express";
-import { createPost, getPosts } from "../controllers/post";
+import { createPost, getPosts, getPostById, getPostsBySender, updatePost } from "../controllers/post";
+import { get, isValidObjectId } from "mongoose";
 const postRouter = express.Router();
 
 postRouter.post('/', async (req, res) => {
@@ -18,20 +19,55 @@ postRouter.post('/', async (req, res) => {
 })
 
 postRouter.get('/', async (req, res) => {
-    const post = await getPosts();
+    const sender = req.query.sender as string;
+
+    if (sender) {
+        const posts = await getPostsBySender(sender);
+        return res.status(200).send(posts);
+    }
+
+    const posts = await getPosts();
+    return res.status(200).send(posts);
+})
+
+postRouter.get('/:id', async (req, res) => {
+    const id = req.params.id;
+
+    if (!isValidObjectId(id)) {
+        res.status(400).send('Invalid Post Id')
+    }
+
+    const post = await getPostById(id);
+
+    if (!post) {
+        res.status(404).send('Post Not Found');
+    }
+
     res.status(200).send(post);
 })
 
-/*
-SHAY - Get a Post by ID
-*/
+postRouter.put('/:id', async (req, res) => {
+    const id = req.params.id; 
+    if (!isValidObjectId(id)) {
+        return res.status(400).send('Invalid Post Id');
+    }
 
-/*
-SHAY - Get Posts by Sender
-*/
+    if (!req.body) {
+        return res.status(400).send('Missing Body');
+    }
 
-/*
-SHAY - Update a Post
-*/
+    const { title, sender, content } = req.body;
+
+    if (!title || !sender || !content) {
+        return res.status(400).send('Invalid Post');
+    }
+
+    const updatedPost = await updatePost(id, req.body);
+
+    if (!updatedPost) {
+        return res.status(404).send('Post Not Found');
+    }
+    res.status(200).send(updatedPost);
+})
 
 export default postRouter
