@@ -2,7 +2,7 @@ import mongoose, { Schema } from 'mongoose';
 
 interface IComment {
     postId: mongoose.Types.ObjectId,
-    sender: string,
+    sender: mongoose.Types.ObjectId,
     content: string
 }
 
@@ -13,7 +13,8 @@ const commentSchema = new mongoose.Schema<IComment>({
         required: true
     },
     sender: {
-        type: String,
+        type: Schema.Types.ObjectId,
+        ref: "users",
         required: true
     },
     content: {

@@ -1,7 +1,7 @@
 import mongoose from 'mongoose';
 
 interface IPost {
-    sender: string,
+    sender: mongoose.Types.ObjectId,
     title: string,
     content: string
 }
@@ -12,7 +12,8 @@ const postSchema = new mongoose.Schema<IPost>({
         required: true,
     },
     sender: {
-        type: String,
+        type:mongoose.Types.ObjectId,
+        ref: "users",
         required: true
     },
     content: {
