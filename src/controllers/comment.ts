@@ -1,7 +1,7 @@
 import commentModel from '../models/comment'
 
 export const createComment = async (postId: string, sender: string, content: string) => {
-    await commentModel.create({postId , sender, content});
+    return await commentModel.create({postId , sender, content});
 }
 
 export const getComments = async () => {
