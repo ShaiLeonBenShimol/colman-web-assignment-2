@@ -4,6 +4,7 @@ import commentRouter from "../routes/comment";
 import postRouter from "../routes/post";
 import mongoose from "mongoose";
 import { MongoMemoryServer } from "mongodb-memory-server-core/lib/MongoMemoryServer";
+import userRouter from "../routes/user";
 
 
 export function createTestApp(): express.Application {
@@ -13,6 +14,7 @@ export function createTestApp(): express.Application {
     
     app.use("/comment", commentRouter);
     app.use("/post", postRouter);
+    app.use("/user", userRouter);
     
     return app;
 }

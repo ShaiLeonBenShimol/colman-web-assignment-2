@@ -2,7 +2,7 @@ import userModel from '../models/user'
 import { IUser } from '../models/user'
 
 export const createUser = async (username: string, email: string, passwordHash: string) => {
-    await userModel.create({ username, email, passwordHash });
+    return await userModel.create({ username, email, passwordHash });
 }
 
 export const getUserById = async (id: string) => {
