@@ -1,6 +1,6 @@
 import express from "express";
 import { createPost, getPosts, getPostById, getPostsBySender, updatePost } from "../controllers/post";
-import { get, isValidObjectId } from "mongoose";
+import { isValidObjectId } from "mongoose";
 const postRouter = express.Router();
 
 postRouter.post('/', async (req, res) => {
