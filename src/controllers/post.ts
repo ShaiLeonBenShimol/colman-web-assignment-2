@@ -2,7 +2,7 @@ import postModel from '../models/post'
 import { IPost } from '../models/post'
 
 export const createPost = async (title: string, sender: string, content: string) => {
-    await postModel.create({ title, sender, content });
+    return await postModel.create({ title, sender, content });
 }
 
 export const getPostById = async (id: string) => {
