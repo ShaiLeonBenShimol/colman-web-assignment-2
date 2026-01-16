@@ -2,15 +2,17 @@ import express from "express";
 import supertest from "supertest";
 import { MongoMemoryServer } from "mongodb-memory-server";
 import mongoose from "mongoose";
+import { IComment } from "../models/comment";
 
 import commentModel from "../models/comment";
 import postModel from "../models/post";
 import userModel from "../models/user";
 import { createTestApp, createMongoMemoryDatabase} from "./testUtils";
+import TestAgent from "supertest/lib/agent";
 
 let app: express.Application;
 let mongoServer: MongoMemoryServer;
-let request: any;
+let request: TestAgent;
 
 // Test data
 const testUser = {
@@ -173,7 +175,7 @@ describe("Comment Routes", () => {
                 
             expect(Array.isArray(response.body)).toBe(true);
             expect(response.body.length).toBe(2);
-            response.body.forEach((comment: any) => {
+            response.body.forEach((comment: IComment) => {
                 expect(comment.postId).toBe(testComment.postId);
             });
         });

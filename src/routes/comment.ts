@@ -1,7 +1,7 @@
 import express from "express";
 import { createComment, getComments, getCommentById, deleteComment, updateComment, getCommentsByPostId } from "../controllers/comment";
 import { getPostById } from "../controllers/post";
-import { get, isValidObjectId } from "mongoose";
+import { isValidObjectId } from "mongoose";
 const commentRouter = express.Router();
 
 commentRouter.post('/', async (req, res) => {

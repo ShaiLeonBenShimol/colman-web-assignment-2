@@ -6,10 +6,11 @@ import bcrypt from "bcrypt";
 
 import userModel from "../models/user";
 import { createTestApp, createMongoMemoryDatabase } from "./testUtils";
+import TestAgent from "supertest/lib/agent";
 
 let app: express.Application;
 let mongoServer: MongoMemoryServer;
-let request: any;
+let request: TestAgent;
 
 // Test data
 const testUser = {
