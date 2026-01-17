@@ -88,6 +88,22 @@ const options = {
             },
           },
         },
+        LoginRequest: {
+          type: 'object',
+          required: ['username', 'password'],
+          properties: {
+            username: {
+              type: 'string',
+              description: 'Unique username for the user',
+              example: 'johndoe',
+            },
+            password: {
+              type: 'string',
+              description: 'password',
+              example: 'securePassword123',
+            },
+          },
+        },
         Error: {
           type: 'object',
           properties: {

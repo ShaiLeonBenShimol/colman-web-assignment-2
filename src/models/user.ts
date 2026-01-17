@@ -3,7 +3,8 @@ import mongoose from 'mongoose';
 interface IUser {
     username: string,
     email: string,
-    passwordHash: string
+    passwordHash: string,
+    tokens: string[]
 }
 
 const userSchema = new mongoose.Schema<IUser>({
@@ -20,7 +21,12 @@ const userSchema = new mongoose.Schema<IUser>({
     passwordHash: {
         type: String,
         required: true
+    },
+    tokens: {
+        type: [String],
+        default: []
     }
+
 });
 
 const userModel = mongoose.model<IUser>("users", userSchema);
