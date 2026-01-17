@@ -1,62 +1,10 @@
 import express from "express";
-import { createUser, getUsers, getUserById, getUserByUsername, updateUser, deleteUser } from "../controllers/user";
+import { getUsers, getUserById, getUserByUsername, updateUser, deleteUser } from "../controllers/user";
 import { isValidObjectId } from "mongoose";
 import bcrypt from "bcrypt";
 import { MongoServerError } from "mongodb";
 
 const userRouter = express.Router();
-
-/**
- * @swagger
- * /user:
- *   post:
- *     tags: [Users]
- *     summary: Create a new user
- *     description: Creates a new user with a unique username and email. The password is automatically hashed using bcrypt.
- *     requestBody:
- *       required: true
- *       content:
- *         application/json:
- *           schema:
- *             $ref: '#/components/schemas/CreateUserRequest'
- *     responses:
- *       200:
- *         description: User created successfully
- *         content:
- *           application/json:
- *             schema:
- *               $ref: '#/components/schemas/User'
- *       400:
- *         description: Bad request - missing body, invalid user data, or duplicate username/email
- *         content:
- *           text/plain:
- *             schema:
- *               type: string
- *               example: "Username or email already exists"
- */
-
-userRouter.post('/', async (req, res) => {
-    if (!req.body) {
-        return res.status(400).send('Missing Body');
-    }
-    
-    const { username, email, password } = req.body;
-
-    if (!username || !email || !password) {
-        return res.status(400).send('Invalid User');
-    }
-
-    try {
-        const passwordHash = await bcrypt.hash(password, 10);
-        const user = await createUser(username, email, passwordHash);
-        res.status(200).send(user);
-    } catch (error) {
-        if (error instanceof MongoServerError && error.code === 11000) {
-            return res.status(400).send('Username or email already exists');
-        }
-        throw error;
-    }
-})
 
 /**
  * @swagger
