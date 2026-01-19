@@ -14,6 +14,10 @@ const options = {
         name: 'Users',
         description: 'User management operations',
       },
+      {
+        name: 'Comments',
+        description: 'Comment management operations',
+      },
     ],
     servers: [
       {
@@ -134,9 +138,31 @@ const options = {
             _id: { type: "string", example: "65b7c9c8e2f0a9a1f2c9d111" },
             title: { type: "string", example: "My first post" },
             content: { type: "string", example: "This is the content of the post." },
-            sender: { type: "string", example: "65b7c9c8e2f0a9a1f2c9d111" },
-            createdAt: { type: "string", example: "2026-01-18T12:00:00.000Z" },
-            updatedAt: { type: "string", example: "2026-01-18T12:00:00.000Z" }
+            sender: { type: "string", example: "65b7c9c8e2f0a9a1f2c9d111" }
+          }
+        },
+        CreateCommentRequest: {
+          type: "object",
+          required: ["postId", "content"],
+          properties: {
+            postId: { type: "string", example: "65b7c9c8e2f0a9a1f2c9d111" },
+            content: { type: "string", example: "This is a great post!" }
+          }
+        },
+        UpdateCommentRequest: {
+          type: "object",
+          required: ["content"],
+          properties: {
+            content: { type: "string", example: "Updated comment content" }
+          }
+        },
+        Comment: {
+          type: "object",
+          properties: {
+            _id: { type: "string", example: "65b7c9c8e2f0a9a1f2c9d222" },
+            postId: { type: "string", example: "65b7c9c8e2f0a9a1f2c9d111" },
+            sender: { type: "string", example: "65b7c9c8e2f0a9a1f2c9d333" },
+            content: { type: "string", example: "This is a great post!" }
           }
         },
         Error: {

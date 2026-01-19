@@ -9,12 +9,14 @@ import { createApp, Mode, TestableApplication } from "../server/server";
 
 let app: TestableApplication;
 let request: TestAgent;
+let accessToken: string;
+let userId: string;
 
 // Test data
 const testUser = {
     username: "testuser",
     email: "testuser@example.com",
-    passwordHash: "hashedpassword"
+    password: "password123"
 };
 
 const testPost = {
@@ -34,9 +36,12 @@ beforeAll(async () => {
     request = supertest(app);
     
     // Create test user
-    const user = await userModel.create(testUser);
-    testPost.sender = user._id.toString();
-    testComment.sender = user._id.toString();
+    const registerUser = await request.post("/auth/register").send(testUser);
+    userId = registerUser.body._id.toString();
+    const loggedInUser = await request.post("/auth/login").send(testUser);
+    accessToken = loggedInUser.body.accessToken;
+    testPost.sender = userId;
+    testComment.sender = userId;
     
     // Create test post
     const post = await postModel.create(testPost);
@@ -62,6 +67,7 @@ describe("Comment Routes", () => {
         it("should create a new comment successfully", async () => {
             const response = await request
                 .post("/comment")
+                .set({ authorization: `JWT ${accessToken}` })
                 .send(testComment)
                 .expect(200);
             
@@ -76,6 +82,7 @@ describe("Comment Routes", () => {
         it("should return 400 when body is missing", async () => {
             const response = await request
                 .post("/comment")
+                .set({ authorization: `JWT ${accessToken}` })
                 .expect(400);
                 
             expect(response.text).toBe("Missing Body");
@@ -89,20 +96,7 @@ describe("Comment Routes", () => {
             
             const response = await request
                 .post("/comment")
-                .send(invalidComment)
-                .expect(400);
-                
-            expect(response.text).toBe("Invalid Comment");
-        });
-        
-        it("should return 400 when sender is missing", async () => {
-            const invalidComment = {
-                postId: testComment.postId,
-                content: testComment.content
-            };
-            
-            const response = await request
-                .post("/comment")
+                .set({ authorization: `JWT ${accessToken}` })
                 .send(invalidComment)
                 .expect(400);
                 
@@ -117,6 +111,7 @@ describe("Comment Routes", () => {
             
             const response = await request
                 .post("/comment")
+                .set({ authorization: `JWT ${accessToken}` })
                 .send(invalidComment)
                 .expect(400);
                 
@@ -132,6 +127,7 @@ describe("Comment Routes", () => {
             
             const response = await request
                 .post("/comment")
+                .set({ authorization: `JWT ${accessToken}` })
                 .send(invalidComment)
                 .expect(400);
                 
@@ -156,6 +152,7 @@ describe("Comment Routes", () => {
         it("should return all comments when no postId query parameter", async () => {
             const response = await request
                 .get("/comment")
+                .set({ authorization: `JWT ${accessToken}` })
                 .expect(200);
                 
             expect(Array.isArray(response.body)).toBe(true);
@@ -165,6 +162,7 @@ describe("Comment Routes", () => {
         it("should return comments filtered by postId when postId query parameter is provided", async () => {
             const response = await request
                 .get(`/comment?postId=${testComment.postId}`)
+                .set({ authorization: `JWT ${accessToken}` })
                 .expect(200);
                 
             expect(Array.isArray(response.body)).toBe(true);
@@ -179,6 +177,7 @@ describe("Comment Routes", () => {
             
             const response = await request
                 .get(`/comment?postId=${nonExistentPostId}`)
+                .set({ authorization: `JWT ${accessToken}` })
                 .expect(200);
                 
             expect(Array.isArray(response.body)).toBe(true);
@@ -197,6 +196,7 @@ describe("Comment Routes", () => {
         it("should return comment by valid ID", async () => {
             const response = await request
                 .get(`/comment/${commentId}`)
+                .set({ authorization: `JWT ${accessToken}` })
                 .expect(200);
                 
             expect(response.body).toBeDefined();
@@ -207,6 +207,7 @@ describe("Comment Routes", () => {
         it("should return 400 for invalid comment ID format", async () => {
             const response = await request
                 .get("/comment/invalid-id")
+                .set({ authorization: `JWT ${accessToken}` })
                 .expect(400);
                 
             expect(response.text).toBe("Invalid Comment Id");
@@ -217,6 +218,7 @@ describe("Comment Routes", () => {
             
             const response = await request
                 .get(`/comment/${nonExistentId}`)
+                .set({ authorization: `JWT ${accessToken}` })
                 .expect(404);
                 
             expect(response.text).toBe("Comment Not Found");
@@ -234,6 +236,7 @@ describe("Comment Routes", () => {
         it("should delete comment successfully", async () => {
             const response = await request
                 .delete(`/comment/${commentId}`)
+                .set({ authorization: `JWT ${accessToken}` })
                 .expect(200);
                 
             expect(response.body).toBeDefined();
@@ -246,6 +249,7 @@ describe("Comment Routes", () => {
         it("should return 400 for invalid comment ID format", async () => {
             const response = await request
                 .delete("/comment/invalid-id")
+                .set({ authorization: `JWT ${accessToken}` })
                 .expect(400);
                 
             expect(response.text).toBe("Invalid Comment Id");
@@ -256,9 +260,26 @@ describe("Comment Routes", () => {
             
             const response = await request
                 .delete(`/comment/${nonExistentId}`)
+                .set({ authorization: `JWT ${accessToken}` })
                 .expect(404);
                 
             expect(response.text).toBe("Comment Not Found");
+        });
+        
+        it("Block user from deleting other user's comment", async () => {
+            const differentUserId = new mongoose.Types.ObjectId().toString();
+            const comment = await commentModel.create({
+                ...testComment,
+                sender: differentUserId
+            });
+            commentId = comment._id.toString();
+            
+            const response = await request
+                .delete(`/comment/${commentId}`)
+                .set({ authorization: `JWT ${accessToken}` })
+                .expect(400);
+                
+            expect(response.text).toBe("Unauthorized");
         });
     });
     
@@ -275,6 +296,7 @@ describe("Comment Routes", () => {
             
             const response = await request
                 .patch(`/comment/${commentId}`)
+                .set({ authorization: `JWT ${accessToken}` })
                 .send({ content: updatedContent })
                 .expect(200);
                 
@@ -282,7 +304,6 @@ describe("Comment Routes", () => {
             expect(response.body._id).toBe(commentId);
             expect(response.body.content).toBe(updatedContent);
             
-            // Verify comment was updated using model directly
             const updatedComment = await commentModel.findById(commentId);
             expect(updatedComment?.content).toBe(updatedContent);
         });
@@ -290,6 +311,7 @@ describe("Comment Routes", () => {
         it("should return 400 for invalid comment ID format", async () => {
             const response = await request
                 .patch("/comment/invalid-id")
+                .set({ authorization: `JWT ${accessToken}` })
                 .send({ content: "Updated content" })
                 .expect(400);
                 
@@ -299,6 +321,7 @@ describe("Comment Routes", () => {
         it("should return 400 when body is missing", async () => {
             const response = await request
                 .patch(`/comment/${commentId}`)
+                .set({ authorization: `JWT ${accessToken}` })
                 .expect(400);
                 
             expect(response.text).toBe("Missing Body");
@@ -307,6 +330,7 @@ describe("Comment Routes", () => {
         it("should return 400 when content is missing in body", async () => {
             const response = await request
                 .patch(`/comment/${commentId}`)
+                .set({ authorization: `JWT ${accessToken}` })
                 .send({})
                 .expect(400);
                 
@@ -318,10 +342,28 @@ describe("Comment Routes", () => {
             
             const response = await request
                 .patch(`/comment/${nonExistentId}`)
+                .set({ authorization: `JWT ${accessToken}` })
                 .send({ content: "Updated content" })
                 .expect(404);
                 
             expect(response.text).toBe("Comment Not Found");
+        });
+        
+        it("Block user from editing other user's comment", async () => {
+            const differentUserId = new mongoose.Types.ObjectId().toString();
+            const comment = await commentModel.create({
+                ...testComment,
+                sender: differentUserId
+            });
+            commentId = comment._id.toString();
+            
+            const response = await request
+                .patch(`/comment/${commentId}`)
+                .set({ authorization: `JWT ${accessToken}` })
+                .send({ content: "Updated content" })
+                .expect(400);
+                
+            expect(response.text).toBe("Unauthorized");
         });
     });
 });

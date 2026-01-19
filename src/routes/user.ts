@@ -140,6 +140,16 @@ userRouter.patch('/:id', async (req, res) => {
         return res.status(400).send('Invalid User Id');
     }
 
+    const sender = req.user;
+
+    if (!sender) {
+        return res.status(400).send('Unauthenticated');
+    }
+
+    if (sender._id !== id) {
+        return res.status(400).send('Unauthorized');
+    }
+
     if (!req.body) {
         return res.status(400).send('Missing Body');
     }
@@ -212,6 +222,16 @@ userRouter.delete('/:id', async (req, res) => {
     
     if (!isValidObjectId(id)) {
         return res.status(400).send('Invalid User Id');
+    }
+
+    const sender = req.user;
+
+    if (!sender) {
+        return res.status(400).send('Unauthenticated');
+    }
+
+    if (sender._id !== id) {
+        return res.status(400).send('Unauthorized');
     }
 
     const deletedUser = await deleteUser(id);

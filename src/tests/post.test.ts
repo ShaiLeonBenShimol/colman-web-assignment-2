@@ -31,7 +31,6 @@ beforeAll(async () => {
     
     // Create test user
     const registerUser = await request.post("/auth/register").send(testUser);
-    console.log(registerUser)
     userId = registerUser.body._id.toString();
     const loggedInUser = await request.post("/auth/login").send(testUser);
     accessToken = loggedInUser.body.accessToken;
