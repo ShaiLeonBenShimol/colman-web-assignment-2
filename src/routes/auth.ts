@@ -12,14 +12,15 @@ const authRouter = express.Router();
  * /auth/register:
  *   post:
  *     tags: [Auth]
- *     summary: Register a new User
- *     description: Registers a new user with a unique username and email. The password is automatically hashed using bcrypt.
+ *     summary: Register a new user
+ *     security: []
+ *     description: Registers a new user with a unique username and email. Password is hashed using bcrypt.
  *     requestBody:
  *       required: true
  *       content:
  *         application/json:
  *           schema:
- *             $ref: '#/components/schemas/CreateUserRequest'
+ *             $ref: '#/components/schemas/RegisterRequest'
  *     responses:
  *       200:
  *         description: User created successfully
@@ -28,12 +29,12 @@ const authRouter = express.Router();
  *             schema:
  *               $ref: '#/components/schemas/User'
  *       400:
- *         description: Bad request - missing body, invalid user data, or duplicate username/email
+ *         description: Invalid request or duplicate user
  *         content:
  *           text/plain:
  *             schema:
  *               type: string
- *               example: "Username or email already exists"
+ *               example: Username or email already exists
  */
 
 authRouter.post('/register', async (req, res) => {
@@ -64,8 +65,9 @@ authRouter.post('/register', async (req, res) => {
  * /auth/login:
  *   post:
  *     tags: [Auth]
- *     summary: Login as User
- *     description: Login in as a user and provide access tokens.
+ *     summary: Login user
+ *     security: []
+ *     description: Authenticates user credentials and returns access & refresh tokens.
  *     requestBody:
  *       required: true
  *       content:
@@ -74,19 +76,18 @@ authRouter.post('/register', async (req, res) => {
  *             $ref: '#/components/schemas/LoginRequest'
  *     responses:
  *       200:
- *         description: User Logged In successfully
+ *         description: Login successful
  *         content:
- *           text/plain:
+ *           application/json:
  *             schema:
- *               type: string
- *               example: "Logged In Successfully!"
+ *               $ref: '#/components/schemas/AuthTokens'
  *       400:
- *         description: Bad request - Invalid User or Password
+ *         description: Invalid credentials
  *         content:
  *           text/plain:
  *             schema:
  *               type: string
- *               example: "Invalid User or Password"
+ *               example: Invalid Credentials
  */
 
 authRouter.post('/login', async (req, res) => {
@@ -109,11 +110,8 @@ authRouter.post('/login', async (req, res) => {
         const accessToken = await generateToken({'_id': user._id}, TokenType.ACCESS)
         const refreshToken = await generateToken({'_id': user._id}, TokenType.REFRESH)
 
-        if (!user.tokens) {
-            user.tokens = [refreshToken]
-        } else {
-            user.tokens.push(refreshToken);
-        }
+        user.tokens.push(refreshToken);
+
         await updateUser(user._id.toString(), user)
 
 
@@ -132,23 +130,30 @@ authRouter.post('/login', async (req, res) => {
  * /auth/refreshToken:
  *   post:
  *     tags: [Auth]
- *     summary: refresh Token
- *     description: Refresh Access token and Access token.
+ *     summary: Refresh tokens
+ *     security: []
+ *     description: Generates a new access token and refresh token using a valid refresh token.
  *     responses:
  *       200:
- *         description: User requested tokens successfully
+ *         description: Tokens refreshed successfully
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/AuthTokens'
+ *       401:
+ *         description: Unauthorized
  *         content:
  *           text/plain:
  *             schema:
  *               type: string
- *               example: "Logged In Successfully!"
+ *               example: Unauthorized
  *       400:
- *         description: Bad request - Invalid token
+ *         description: Invalid refresh token
  *         content:
  *           text/plain:
  *             schema:
  *               type: string
- *               example: "Invalid token"
+ *               example: Invalid refresh token
  */
 
 authRouter.post('/refreshToken', async (req, res) => {
@@ -167,12 +172,12 @@ authRouter.post('/refreshToken', async (req, res) => {
         user.tokens[user.tokens.indexOf(token)] = refreshToken;
         await updateUser(user._id.toString(), user)
 
-        res.status(200).send({
+        return res.status(200).send({
             'accessToken': accessToken,
             'refreshToken': refreshToken
         });
     } catch (err) {
-        res.status(400).send(err)
+        return res.status(400).send(err)
     }
 })
 
@@ -181,23 +186,33 @@ authRouter.post('/refreshToken', async (req, res) => {
  * /auth/logout:
  *   post:
  *     tags: [Auth]
- *     summary: Logs Out
- *     description: Logs Out as the User.
+ *     summary: Logout user
+ *     description: Logs out the user by invalidating a refresh token.
+ *     security:
+ *       - BearerAuth: []
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             $ref: '#/components/schemas/LogoutRequest'
  *     responses:
  *       200:
- *         description: User Logged Out Successfully
+ *         description: Logged out successfully
+ *       401:
+ *         description: Unauthorized
  *         content:
  *           text/plain:
  *             schema:
  *               type: string
- *               example: "Logged In Successfully!"
+ *               example: Unauthorized
  *       400:
- *         description: Invalid Request
+ *         description: Invalid session
  *         content:
  *           text/plain:
  *             schema:
  *               type: string
- *               example: "Invalid User Session"
+ *               example: Invalid User Session
  */
 
 authRouter.post('/logout', authenticate, async (req, res) => {

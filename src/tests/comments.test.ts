@@ -1,17 +1,13 @@
-import express from "express";
 import supertest from "supertest";
-import { MongoMemoryServer } from "mongodb-memory-server";
 import mongoose from "mongoose";
 import { IComment } from "../models/comment";
-
 import commentModel from "../models/comment";
 import postModel from "../models/post";
 import userModel from "../models/user";
-import { createTestApp, createMongoMemoryDatabase} from "./testUtils";
 import TestAgent from "supertest/lib/agent";
+import { createApp, Mode, TestableApplication } from "../server/server";
 
-let app: express.Application;
-let mongoServer: MongoMemoryServer;
+let app: TestableApplication;
 let request: TestAgent;
 
 // Test data
@@ -34,11 +30,7 @@ const testComment = {
 };
 
 beforeAll(async () => {
-    // Setup in-memory MongoDB
-    mongoServer = await createMongoMemoryDatabase();
-    
-    // Setup Express app for testing
-    app = createTestApp();
+    app = await createApp(Mode.TEST);
     request = supertest(app);
     
     // Create test user
@@ -54,7 +46,9 @@ beforeAll(async () => {
 afterAll(async () => {
     await mongoose.connection.dropDatabase();
     await mongoose.connection.close();
-    await mongoServer.stop();
+    if (app.close) {
+        await app.close()
+    }
 });
 
 beforeEach(async () => {
