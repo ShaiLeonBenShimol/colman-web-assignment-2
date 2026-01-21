@@ -11,6 +11,9 @@ module.exports = {
     'src/**/*.ts',
     '!src/**/*.d.ts',
     '!src/tests/testUtils.ts',
+    '!src/app.ts',
+    '!src/utils/**/*',
+    '!src/server/server.ts'
   ],
   moduleFileExtensions: ['ts', 'js', 'json'],
   verbose: true,

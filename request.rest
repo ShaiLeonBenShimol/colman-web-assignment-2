@@ -1,45 +1,114 @@
 # Get Posts
 GET http://localhost:4000/post
+Authorization: Bearer ACCESS_TOKEN
 ###
 # Create Post
 POST http://localhost:4000/post
+Authorization: Bearer ACCESS_TOKEN
 Content-Type: application/json
 
 { "title": "first post", "sender": "shai", "content": "my life is a lie" }
 ###
 # Get Post by ID
 GET http://localhost:4000/post/695a9c6ef52498fa30454939
+Authorization: Bearer ACCESS_TOKEN
 ###
 # Update Post
 PUT http://localhost:4000/post/695a9c6ef52498fa30454937
+Authorization: Bearer ACCESS_TOKEN
 Content-Type: application/json 
 
 { "title": "first post2", "sender": "chang", "content": "my life is a lie 2" }
 ###
 # Get Posts by Sender
 GET http://localhost:4000/post?sender=chang
+Authorization: Bearer ACCESS_TOKEN
 ###
 # Get Comments
 GET http://localhost:4000/comment
+Authorization: Bearer ACCESS_TOKEN
 ###
 # Get Comment
 GET http://localhost:4000/comment/695a9e98c7b19ffc8e6d78ae
+Authorization: Bearer ACCESS_TOKEN
 ###
 # Create Comment
 POST http://localhost:4000/comment
+Authorization: Bearer ACCESS_TOKEN
 Content-Type: application/json
 
 { "postId": "695a9c6ef52498fa30454937", "sender": "shai", "content": "testing" }
 ###
 # Update Comment
 PATCH http://localhost:4000/comment/695a9e98c7b19ffc8e6d78ae
+Authorization: Bearer ACCESS_TOKEN
 Content-Type: application/json
 
 {"content": "your life is a lie 3" }
 ###
 # Delete Comment
 DELETE http://localhost:4000/comment/695a9e98c7b19ffc8e6d78ae
+Authorization: Bearer ACCESS_TOKEN
 ###
 # Get Comments by Post ID
 GET http://localhost:4000/comment?postId=695a9c6ef52498fa30454937
+Authorization: Bearer ACCESS_TOKEN
+###
+# Register User
+POST http://localhost:4000/auth/register
+Content-Type: application/json
+
+{
+  "username": "testuser",
+  "email": "testuser@example.com",
+  "password": "password123"
+}
+###
+# Login
+POST http://localhost:4000/auth/login
+Content-Type: application/json
+
+{
+  "username": "testuser",
+  "password": "password123"
+}
+###
+# Refresh Token
+POST http://localhost:4000/auth/refreshToken
+Authorization: Bearer REFRESH_TOKEN
+###
+# Logout
+POST http://localhost:4000/auth/logout
+Authorization: Bearer ACCESS_TOKEN
+Content-Type: application/json
+
+{
+  "refreshToken": "REFRESH_TOKEN"
+}
+###
+# Get All Users
+GET http://localhost:4000/user
+Authorization: Bearer ACCESS_TOKEN
+###
+# Get User by ID
+GET http://localhost:4000/user/6970e0544a4a8efe154d3ba5
+Authorization: Bearer ACCESS_TOKEN
+###
+# Get User by Username
+GET http://localhost:4000/user/testuser
+Authorization: Bearer ACCESS_TOKEN
+###
+# Update User
+PATCH http://localhost:4000/user/6970e0544a4a8efe154d3ba5
+Authorization: Bearer ACCESS_TOKEN
+Content-Type: application/json
+
+{
+  "email": "newemail@example.com",
+  "password": "newpassword123"
+}
+###
+# Delete User
+DELETE http://localhost:4000/user/6970e0544a4a8efe154d3ba5
+Authorization: Bearer ACCESS_TOKEN
 ###
