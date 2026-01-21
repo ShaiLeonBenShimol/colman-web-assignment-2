@@ -44,11 +44,6 @@ afterAll(async () => {
     }
 });
 
-beforeEach(async () => {
-    // Clean up users before each test
-    await userModel.deleteMany({});
-});
-
 // Helper function to create a user with hashed password
 const createUserWithHashedPassword = async (userData: { username: string; email: string; password: string }) => {
     const passwordHash = await bcrypt.hash(userData.password, 10);
@@ -79,7 +74,6 @@ describe("User Routes", () => {
     describe("GET /user", () => {
         beforeEach(async () => {
             // Create some test users
-            await createUserWithHashedPassword(testUser);
             await createUserWithHashedPassword(testUser2);
         });
         
@@ -95,12 +89,6 @@ describe("User Routes", () => {
     });
     
     describe("GET /user/:id", () => {
-        let userId: string;
-        
-        beforeEach(async () => {
-            const user = await createUserWithHashedPassword(testUser);
-            userId = user._id.toString();
-        });
         
         it("should return user by valid ID", async () => {
             const response = await request
@@ -150,6 +138,7 @@ describe("User Routes", () => {
         
         beforeEach(async () => {
             // Create a fresh user for each test
+            await userModel.deleteMany({});
             const result = await createAuthenticatedUser();
             testUserId = result.userId;
             testUserAccessToken = result.accessToken;
@@ -260,7 +249,7 @@ describe("User Routes", () => {
         let testUserAccessToken: string;
         
         beforeEach(async () => {
-            // Create a fresh user for each test
+            await userModel.deleteMany({});
             const result = await createAuthenticatedUser();
             testUserId = result.userId;
             testUserAccessToken = result.accessToken;
